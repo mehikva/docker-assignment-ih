@@ -22,6 +22,8 @@ jobs:
           username: ${{ secrets.AZURE_VM_USER }}
           password: ${{ secrets.AZURE_VM_PASSWORD }}   
           script: |
+            export PATH=$PATH:/usr/local/bin:/usr/bin
+
             # Navigate to (or create) the app directory
             mkdir -p ~/docker-assignment-ih
             cd ~/docker-assignment-ih
