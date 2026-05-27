@@ -1,0 +1,41 @@
+name: Build and Deploy to Azure VM
+
+on:
+  push:
+    branches:
+      - main   # triggers on every push to main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest   # the GitHub-hosted runner that executes the steps
+
+    steps:
+      # 1. Check out the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. SSH into the Azure VM and deploy
+      - name: Deploy to Azure VM
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AZURE_VM_HOST }}
+          username: ${{ secrets.AZURE_VM_USER }}
+          password: ${{ secrets.AZURE_VM_PASSWORD }}   
+          script: |
+            # Navigate to (or create) the app directory
+            mkdir -p ~/docker-assignment-ih
+            cd ~/docker-assignment-ih
+
+            # Pull the latest code
+            if [ -d ".git" ]; then
+              git pull origin main
+            else
+              git clone https://github.com/mehikva/docker-assignment-ih.git .
+            fi
+
+            # Stop old containers, rebuild images, and start fresh
+            docker compose down
+            docker compose up --build -d
+
+            # Clean up unused images to save disk space
+            docker image prune -f
